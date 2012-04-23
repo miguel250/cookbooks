@@ -1,0 +1,18 @@
+[submodule "nginx"]
+	path = nginx
+	url = https://github.com/opscode-cookbooks/nginx
+[submodule "python"]
+	path = python
+	url = https://github.com/opscode-cookbooks/python
+[submodule "build-essential"]
+	path = build-essential
+	url = https://github.com/opscode-cookbooks/build-essential.git
+[submodule "apt"]
+	path = apt
+	url = https://github.com/opscode-cookbooks/apt.git
+[submodule "mongo"]
+	path = mongo
+	url = https://github.com/edelight/chef-cookbooks.git
+[submodule "gunicorn"]
+	path = gunicorn
+	url = https://github.com/opscode-cookbooks/gunicorn.git
