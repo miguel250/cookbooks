@@ -24,14 +24,17 @@ python_pip "gunicorn" do
   action :install
 end
 
-python_pip "django" do
+python_pip "https://github.com/django-nonrel/django-nonrel/tarball/master" do
   virtualenv "/home/vagrant/python"
-  version "1.4"
   action :install
 end
 
-python_pip "django-mongodb-engine" do
+python_pip "https://github.com/django-nonrel/djangotoolbox/tarball/master" do
   virtualenv "/home/vagrant/python"
-  version "0.4.0"
+  action :install
+end
+
+python_pip "https://github.com/django-nonrel/mongodb-engine/tarball/master" do
+  virtualenv "/home/vagrant/python"
   action :install
 end
