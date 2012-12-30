@@ -19,47 +19,56 @@
 # limitations under the License.
 #
 
-country_dat          = "#{node[:nginx][:geoip][:path]}/GeoIP.dat"
-country_src_filename = ::File.basename(node[:nginx][:geoip][:country_dat_url])
-country_src_filepath = "#{Chef::Config[:file_cache_path]}/#{country_src_filename}"
+package 'libtool'
+
+country_dat          = "#{node['nginx']['geoip']['path']}/GeoIP.dat"
+country_src_filename = ::File.basename(node['nginx']['geoip']['country_dat_url'])
+country_src_filepath = "#{Chef::Config['file_cache_path']}/#{country_src_filename}"
 city_dat             = nil
-city_src_filename    = ::File.basename(node[:nginx][:geoip][:city_dat_url])
-city_src_filepath    = "#{Chef::Config[:file_cache_path]}/#{city_src_filename}"
-geolib_filename      = ::File.basename(node[:nginx][:geoip][:lib_url])
-geolib_filepath      = "#{Chef::Config[:file_cache_path]}/#{geolib_filename}"
+city_src_filename    = ::File.basename(node['nginx']['geoip']['city_dat_url'])
+city_src_filepath    = "#{Chef::Config['file_cache_path']}/#{city_src_filename}"
+geolib_filename      = ::File.basename(node['nginx']['geoip']['lib_url'])
+geolib_filepath      = "#{Chef::Config['file_cache_path']}/#{geolib_filename}"
 
 remote_file geolib_filepath do
-  source node[:nginx][:geoip][:lib_url]
-  checksum node[:nginx][:geoip][:lib_checksum]
+  source node['nginx']['geoip']['lib_url']
+  checksum node['nginx']['geoip']['lib_checksum']
   owner "root"
   group "root"
-  mode 0644
+  mode 00644
 end
 
 bash "extract_geolib" do
   cwd ::File.dirname(geolib_filepath)
   code <<-EOH
     tar xzvf #{geolib_filepath} -C #{::File.dirname(geolib_filepath)}
-    cd GeoIP-#{node[:nginx][:geoip][:lib_version]} && ./configure
+    cd GeoIP-#{node['nginx']['geoip']['lib_version']}
+    which libtoolize && libtoolize -f
+    ./configure
     make && make install
   EOH
 
-  creates "/usr/local/lib/libGeoIP.so.#{node[:nginx][:geoip][:lib_version]}"
+  creates "/usr/local/lib/libGeoIP.so.#{node['nginx']['geoip']['lib_version']}"
   subscribes :run, resources(:remote_file => geolib_filepath)
 end
 
-directory "#{node[:nginx][:geoip][:path]}" do
+directory node['nginx']['geoip']['path'] do
   owner "root"
   group "root"
-  mode 0755
+  mode 00755
+  recursive true
 end
 
 remote_file country_src_filepath do
-  source node[:nginx][:geoip][:country_dat_url]
-  checksum node[:nginx][:geoip][:country_dat_checksum]
+  not_if do
+    File.exists?(country_src_filepath) &&
+    File.mtime(country_src_filepath) > Time.now - 86400
+  end
+  source node['nginx']['geoip']['country_dat_url']
+  checksum node['nginx']['geoip']['country_dat_checksum']
   owner "root"
   group "root"
-  mode 0644
+  mode 00644
 end
 
 bash "gunzip_geo_lite_country_dat" do
@@ -69,15 +78,19 @@ bash "gunzip_geo_lite_country_dat" do
   creates country_dat
 end
 
-if node[:nginx][:geoip][:enable_city]
-  city_dat  = "#{node[:nginx][:geoip][:path]}/GeoLiteCity.dat"
+if node['nginx']['geoip']['enable_city']
+  city_dat  = "#{node['nginx']['geoip']['path']}/GeoLiteCity.dat"
 
   remote_file city_src_filepath do
-    source node[:nginx][:geoip][:city_dat_url]
-    checksum node[:nginx][:geoip][:city_dat_checksum]
+    not_if do
+      File.exists?(city_src_filepath) &&
+      File.mtime(city_src_filepath) > Time.now - 86400
+    end
+    source node['nginx']['geoip']['city_dat_url']
+    checksum node['nginx']['geoip']['city_dat_checksum']
     owner "root"
     group "root"
-    mode 0644
+    mode 00644
   end
 
   bash "gunzip_geo_lite_city_dat" do
@@ -88,16 +101,16 @@ if node[:nginx][:geoip][:enable_city]
   end
 end
 
-template "#{node[:nginx][:dir]}/conf.d/http_geoip.conf" do
+template "#{node['nginx']['dir']}/conf.d/http_geoip.conf" do
   source "modules/http_geoip.conf.erb"
   owner "root"
   group "root"
-  mode "0644"
+  mode 00644
   variables(
     :country_dat => country_dat,
     :city_dat => city_dat
   )
 end
 
-node.run_state[:nginx_configure_flags] =
-  node.run_state[:nginx_configure_flags] | ["--with-http_geoip_module", "--with-ld-opt='-Wl,-R,/usr/local/lib -L /usr/local/lib'"]
+node.run_state['nginx_configure_flags'] =
+  node.run_state['nginx_configure_flags'] | ["--with-http_geoip_module", "--with-ld-opt='-Wl,-R,/usr/local/lib -L /usr/local/lib'"]

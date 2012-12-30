@@ -16,6 +16,9 @@ Cookbooks
 ---------
 
 * build-essential
+* yum
+
+NOTE: The `yum` cookbook is a dependency of the cookbook, and will be used to install [EPEL](http://fedoraproject.org/wiki/EPEL) on RedHet/CentOS 5.x systems to provide the Python 2.6 packages.
 
 Attributes
 ==========
@@ -23,7 +26,6 @@ Attributes
 See `attributes/default.rb` for default values.
 
 * `node["python"]["install_method"]` - method to install python with, default `package`.
-* `node["python"]["distribute_install_py_version"]` - version of python to use when installing distribute. default '', specify version like '2.6' (uses python2.6 binary).
 
 The file also contains the following attributes:
 
@@ -48,6 +50,8 @@ Install packages using the new hotness in Python package management...[`pip`](ht
 - :install: Install a pip package - if version is provided, install that specific version
 - :upgrade: Upgrade a pip package - if version is provided, upgrade to that specific version
 - :remove: Remove a pip package
+- :user: User to run pip as, for using with virtualenv
+- :group: Group to run pip as, for using with virtualenv
 - :purge: Purge a pip package (this usually entails removing configuration files as well as the package itself).  With pip packages this behaves the same as `:remove`
 
 # Attribute Parameters
@@ -99,6 +103,7 @@ Install packages using the new hotness in Python package management...[`pip`](ht
 - interpreter: The Python interpreter to use. default is `python2.6`
 - owner: The owner for the virtualenv
 - group: The group owner of the file (string or id)
+- options : Command line options (string)
 
 # Example
 
@@ -114,6 +119,14 @@ Install packages using the new hotness in Python package management...[`pip`](ht
       interpreter "python2.4"
       owner "ubuntu"
       group "ubuntu"
+      action :create
+    end
+
+    # create a Python 2.6 virtualenv with access to the global packages owned by ubuntu user
+    python_virtualenv "/home/ubuntu/my_old_ve" do
+      owner "ubuntu"
+      group "ubuntu"
+      options "--system-site-packages"
       action :create
     end
 
