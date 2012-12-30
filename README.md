@@ -1,4 +1,4 @@
-mlpz-cookbooks
+Cookbooks
 ==============
 
-mlpz vagrant chef cookbooks
+Chef cookbooks for different projects
