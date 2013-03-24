@@ -64,6 +64,12 @@ event_scheduler      = <%= node['mysql']['tunable']['event_scheduler'] %>
 <%- if node['mysql']['tunable']['skip-character-set-client-handshake'] %>
 skip-character-set-client-handshake
 <%- end %>
+<%- if (node['mysql']['tunable']['lc_messages_dir'] && node['mysql']['tunable']['lc_messages']) %>
+lc_messages_dir	    = <%= node['mysql']['lc_messages_dir'] %>
+lc_messages	    = <%= node['mysql']['lc_messages'] %>
+<%- elsif (node['mysql']['tunable']['languages']) %>
+languages	    = <%= node['mysql']['tunable']['languages'] %>
+<%- end %>
 
 #
 # Instead of skip-networking the default is now to listen only on
@@ -132,7 +138,6 @@ log_warnings
 #
 # * Replication
 #
-read_only = <%= node['mysql']['read_only'] %>
 
 
 #
@@ -154,11 +159,6 @@ log-queries-not-using-indexes
 <%- if node['mysql']['tunable']['server_id'] %>
 server-id = <%= node['mysql']['tunable']['server_id'] %>
 <% end %>
-<%- if node['mysql']['tunable']['binlog_format'] %>
-
-binlog_format = <%= node['mysql']['tunable']['binlog_format'] %>
-
-<%- end %>
 <%- if node['mysql']['tunable']['log_bin'] %>
 log_bin = <%= node['mysql']['tunable']['log_bin'] %>
 <%- if node['mysql']['tunable']['log_bin'] %>
@@ -193,6 +193,9 @@ read_only = 1
 transaction-isolation = <%= node['mysql']['tunable']['transaction-isolation'] %>
 <%- end %>
 
+<%- if node['mysql']['tunable']['slave_compressed_protocol'] %>
+slave_compressed_protocol = <%= node['mysql']['tunable']['slave_compressed_protocol'] %>
+<%- end %>
 #
 # * InnoDB
 #

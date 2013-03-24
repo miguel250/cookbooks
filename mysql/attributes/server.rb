@@ -37,7 +37,7 @@ when "debian"
   default['mysql']['pid_file']                    = "/var/run/mysqld/mysqld.pid"
   default['mysql']['old_passwords']               = 0
   default['mysql']['grants_path']                 = "/etc/mysql/grants.sql"
-when "rhel", "fedora", "suse"
+when "rhel", "fedora"
   if node["mysql"]["version"].to_f >= 5.5
     default['mysql']['service_name']            = "mysql"
     default['mysql']['pid_file']                    = "/var/run/mysql/mysql.pid"
@@ -59,6 +59,20 @@ when "rhel", "fedora", "suse"
   default['mysql']['grants_path']                 = "/etc/mysql_grants.sql"
   # RHEL/CentOS mysql package does not support this option.
   default['mysql']['tunable']['innodb_adaptive_flushing'] = false
+when "suse"
+  default['mysql']['service_name']            = "mysql"
+  default['mysql']['server']['packages']      = %w{mysql-community-server}
+  default['mysql']['basedir']                 = "/usr"
+  default['mysql']['data_dir']                = "/var/lib/mysql"
+  default['mysql']['root_group']              = "root"
+  default['mysql']['mysqladmin_bin']          = "/usr/bin/mysqladmin"
+  default['mysql']['mysql_bin']               = "/usr/bin/mysql"
+  default['mysql']['conf_dir']                = '/etc'
+  default['mysql']['confd_dir']               = '/etc/mysql/conf.d'
+  default['mysql']['socket']                  = "/var/run/mysql/mysql.sock"
+  default['mysql']['pid_file']                = "/var/run/mysql/mysqld.pid"
+  default['mysql']['old_passwords']           = 1
+  default['mysql']['grants_path']             = "/etc/mysql_grants.sql"
 when "freebsd"
   default['mysql']['server']['packages']      = %w{mysql55-server}
   default['mysql']['service_name']            = "mysql-server"
@@ -167,6 +181,7 @@ default['mysql']['tunable']['sql_mode'] = nil
 default['mysql']['tunable']['skip-character-set-client-handshake'] = false
 default['mysql']['tunable']['skip-name-resolve']                   = false
 
+default['mysql']['tunable']['slave_compressed_protocol']       = 0
 
 default['mysql']['tunable']['server_id']                       = nil
 default['mysql']['tunable']['log_bin']                         = nil
@@ -226,7 +241,6 @@ default['mysql']['tunable']['max_binlog_size']      = "100M"
 default['mysql']['tunable']['binlog_cache_size']    = "32K"
 
 default['mysql']['tmpdir'] = ["/tmp"]
-default['mysql']['read_only'] = false
 
 default['mysql']['log_dir'] = node['mysql']['data_dir']
 default['mysql']['log_files_in_group'] = false
