@@ -21,7 +21,7 @@ default['apache']['root_group']  = "root"
 
 # Where the various parts of apache are
 case platform
-when "redhat", "centos", "scientific", "fedora", "suse", "amazon"
+when "redhat", "centos", "scientific", "fedora", "suse", "amazon", "oracle"
   default['apache']['package'] = "httpd"
   default['apache']['dir']     = "/etc/httpd"
   default['apache']['log_dir'] = "/var/log/httpd"
@@ -118,6 +118,9 @@ default['apache']['traceenable'] = "On"
 # mod_auth_openids
 default['apache']['allowed_openids'] = Array.new
 
+# mod_status Allow list, space seprated list of allowed entries.  
+default['apache']['status_allow_list'] = "localhost ip6-localhost"
+
 # mod_status ExtendedStatus, set to 'true' to enable
 default['apache']['ext_status'] = false
 
@@ -131,6 +134,7 @@ default['apache']['prefork']['maxrequestsperchild'] = 10000
 
 # Worker Attributes
 default['apache']['worker']['startservers'] = 4
+default['apache']['worker']['serverlimit'] = 16
 default['apache']['worker']['maxclients'] = 1024
 default['apache']['worker']['minsparethreads'] = 64
 default['apache']['worker']['maxsparethreads'] = 192
