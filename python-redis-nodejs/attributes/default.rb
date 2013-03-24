@@ -1,0 +1,6 @@
+default[:web][:home] = "/home/vagrant"
+default[:web][:env] = "development"
+default[:web][:user] = "vagrant"
+default[:web][:group] = "vagrant"
+default[:web][:app_name] = "app"
+default[:web][:domain] = "192.168.33.10"
