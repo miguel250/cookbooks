@@ -18,4 +18,7 @@ Chef cookbooks for different projects
 * [python](https://github.com/opscode-cookbooks/python)
 * [redisio](https://github.com/brianbianco/redisio)
 * [runit](https://github.com/opscode-cookbooks/runit)
+* [supervisor](https://github.com/opscode-cookbooks/supervisor)
 * [xml](https://github.com/opscode-cookbooks/xml)
+* [ulimit](https://github.com/bmhatfield/chef-ulimit)
+* [yum](https://github.com/opscode-cookbooks/yum)

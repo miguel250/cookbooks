@@ -11,7 +11,10 @@ recipe "python-redis-nodejs", "Installs python, nodejs and redis"
 depends "build-essential"
 depends "apt"
 depends "nginx"
-
+depends "nodejs"
+depends "python"
+depends "supervisor"
+depends "redisio"
 
 %w{ debian ubuntu centos redhat smartos }.each do |os|
     supports os

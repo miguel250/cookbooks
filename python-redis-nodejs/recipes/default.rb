@@ -1,18 +1,33 @@
 include_recipe "apt"
 include_recipe "build-essential"
 include_recipe "git"
+include_recipe "nodejs"
+include_recipe "nodejs::npm"
+include_recipe "python"
+include_recipe "python::pip"
+include_recipe "redisio"
+include_recipe "redisio::install"
+include_recipe "redisio::enable"
+
 
 app_name = node['web']['app_name']
 home_path = node['web']['home']
 app_path = "#{home_path}/#{app_name}"
 
 
-directory "/var/www" do
-  owner "vagrant"
-  group "vagrant"
-  mode 00755
+directory "#{home_path}/python" do
+  owner node['web']['user']
+  group node['web']['group']
+  mode "0755"
   action :create
-  recursive true
+end
+
+#create virtual virtualenv
+python_virtualenv "#{home_path}/python" do
+  interpreter "python2.7"
+  owner node['web']['user']
+  group node['web']['group']
+  action :create
 end
 
 apt_repository "nginx" do
@@ -23,12 +38,10 @@ apt_repository "nginx" do
   key "C300EE8C"
 end
 
-node.override['nginx']['log_dir']    = "#{app_path}/app/logs/nginx"
+node.override['nginx']['log_dir']    = "#{app_path}/logs/nginx"
 node.override['nginx']['user']       = node['web']['user']
 node.override['nginx']['default_site_enabled'] = false
 include_recipe "nginx::default"
-
-
 
 template "/etc/nginx/sites-available/site" do
   source "site.erb"
@@ -37,6 +50,33 @@ template "/etc/nginx/sites-available/site" do
   mode 00644
   variables(:app_path => "#{app_path}/public")
   notifies :reload, 'service[nginx]'
+end
+
+
+node.override['supervisor']['inet_port'] = '*:9001'
+node.override['supervisor']['inet_username'] = 'dev'
+node.override['supervisor']['inet_password'] = 'dev'
+include_recipe "supervisor"
+
+environment = {'PYTHONPATH'=> app_path, 'ENVIRONMENT'=> 'development'}
+
+supervisor_service "web-server" do
+  command "#{app_path}/../python/bin/python #{app_path}/jukebox/app.py"
+  action [:enable, :start]
+  startretries 10
+  redirect_stderr=true
+  environment environment
+  stopasgroup true
+  directory app_path
+  stdout_logfile "#{app_path}/logs/server.log"
+  stderr_logfile "#{app_path}/logs/server.log"
+  autostart true
+  user node['web']['user']
+end
+
+execute "Install app requirements" do
+    command "cd #{app_path} && make requirement"
+    user node['web']['user']
 end
 
 nginx_site 'site' do

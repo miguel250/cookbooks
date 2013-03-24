@@ -1,20 +1,17 @@
+upstream gunicorn {
+   server 127.0.0.1:8000 fail_timeout=0;
+}
+
+
 server {
   listen   80;
 
   root <%= @app_path %>;
-	
+  
   index index.html;
 
   server_name <%= node['web']['domain']  %>;
 
-  if ($http_user_agent ~* (HTTrack|HTMLParser|libcurl|discobot|Exabot|Casper|kmccrew|plaNETWORK|RPT-HTTPClient)) {
-    return 444;
-  }
-
-
-  if ($http_referer ~* (sex|vigra|viagra) ) {
-    return 444;
-  }
 
   ## Deny dot files:
   location ~ /\. {
@@ -31,5 +28,16 @@ server {
   location = /robots.txt {
     access_log off;
     log_not_found off;
+  }
+
+  location / {
+        proxy_pass_header Server;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_connect_timeout 500s;
+        proxy_read_timeout 500s;
+        proxy_pass http://gunicorn;
   }
 }
