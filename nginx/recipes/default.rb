@@ -26,9 +26,13 @@ when 'source'
 when 'package'
   case node['platform']
   when 'redhat','centos','scientific','amazon','oracle'
-    include_recipe 'yum::epel'
+    if node['nginx']['repo_source'] == 'epel'
+      include_recipe 'yum::epel'
+    else
+      include_recipe 'nginx::repo'
+    end
   end
-  package 'nginx'
+  package node['nginx']['package_name']
   service 'nginx' do
     supports :status => true, :restart => true, :reload => true
     action :enable

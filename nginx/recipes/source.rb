@@ -21,24 +21,21 @@
 # limitations under the License.
 #
 
+# This is for Chef 10 and earlier where attributes aren't loaded
+# deterministically (resolved in Chef 11).
+node.load_attribute_by_short_filename('source', 'nginx') if node.respond_to?(:load_attribute_by_short_filename)
 
 nginx_url = node['nginx']['source']['url'] ||
   "http://nginx.org/download/nginx-#{node['nginx']['version']}.tar.gz"
 
-unless(node['nginx']['source']['prefix'])
-  node.set['nginx']['source']['prefix'] = "/opt/nginx-#{node['nginx']['version']}"
-end
-unless(node['nginx']['source']['conf_path'])
-  node.set['nginx']['source']['conf_path'] = "#{node['nginx']['dir']}/nginx.conf"
-end
-unless(node['nginx']['source']['default_configure_flags'])
-  node.set['nginx']['source']['default_configure_flags'] = [
-    "--prefix=#{node['nginx']['source']['prefix']}",
-    "--conf-path=#{node['nginx']['dir']}/nginx.conf"
-  ]
-end
-node.set['nginx']['binary']          = "#{node['nginx']['source']['prefix']}/sbin/nginx"
+node.set['nginx']['binary']          = node['nginx']['source']['sbin_path']
 node.set['nginx']['daemon_disable']  = true
+
+user node['nginx']['user'] do
+  system true
+  shell "/bin/false"
+  home "/var/www"
+end
 
 include_recipe "nginx::ohai_plugin"
 include_recipe "nginx::commons_dir"
@@ -48,6 +45,7 @@ include_recipe "build-essential"
 src_filepath  = "#{Chef::Config['file_cache_path'] || '/tmp'}/nginx-#{node['nginx']['version']}.tar.gz"
 packages = value_for_platform(
     ["centos","redhat","fedora","amazon","scientific"] => {'default' => ['pcre-devel', 'openssl-devel']},
+    "gentoo" => {"default" => []},
     "default" => ['libpcre3', 'libpcre3-dev', 'libssl-dev']
   )
 
@@ -60,12 +58,6 @@ remote_file nginx_url do
   checksum node['nginx']['source']['checksum']
   path src_filepath
   backup false
-end
-
-user node['nginx']['user'] do
-  system true
-  shell "/bin/false"
-  home "/var/www"
 end
 
 node.run_state['nginx_force_recompile'] = false
@@ -121,17 +113,24 @@ else
     )
   end
 
-  defaults_path = case node['platform']
-    when 'debian', 'ubuntu'
-      '/etc/default/nginx'
-    else
-      '/etc/sysconfig/nginx'
+  case node['platform']
+  when 'gentoo'
+    genrate_template = false
+  when 'debian', 'ubuntu'
+    genrate_template = true
+    defaults_path = '/etc/default/nginx'
+  else
+    genrate_template = true
+    defaults_path = '/etc/sysconfig/nginx'
   end
-  template defaults_path do
-    source "nginx.sysconfig.erb"
-    owner "root"
-    group "root"
-    mode 00644
+
+  if genrate_template
+    template defaults_path do
+      source "nginx.sysconfig.erb"
+      owner "root"
+      group "root"
+      mode 00644
+    end
   end
 
   service "nginx" do

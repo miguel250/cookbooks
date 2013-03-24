@@ -1,10 +1,8 @@
 #
-# Cookbook Name:: nginx
-# Attributes:: upload_progress
+# Cookbook Name:: nginx_test
+# Recipe:: default
 #
-# Author:: Jamie Winsor (<jamie@vialstudios.com>)
-#
-# Copyright 2012, Riot Games
+# Copyright 2012, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,5 +17,7 @@
 # limitations under the License.
 #
 
-default['nginx']['upload_progress']['url']      = "https://github.com/masterzen/nginx-upload-progress-module/tarball/v0.8.4"
-default['nginx']['upload_progress']['checksum'] = "7b3f81d30cd3e8af2c343b73d8518d2373b95aeb3d0243790991873a3d91d0c5"
+node.set['nginx']['repo_source'] = 'upstream'
+
+include_recipe "nginx::repo"
+include_recipe "nginx::default"

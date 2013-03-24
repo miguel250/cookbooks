@@ -23,6 +23,9 @@ be controlled by an attribute, so it may not be a common "default."
 
 On RHEL family distros, the "yum" cookbook is required for "`recipe[yum::epel]`".
 
+On Ubuntu, when using Nginx.org's stable package, "`recipe[apt]`"
+is required.
+
 Platform
 --------
 
@@ -84,12 +87,17 @@ config file.
 * `node['nginx']['disable_access_log']` - set to true to disable the
   general access log, may be useful on high traffic sites.
 * `node['nginx']['default_site_enabled']` - enable the default site
+* `node['nginx']['sendfile']` - Whether to use `sendfile`. Defaults to "on".
 * `node['nginx']['install_method']` - Whether nginx is installed from
   packages or from source.
 * `node['nginx']['types_hash_max_size']` - Used for the
   `types_hash_max_size` configuration directive.
 * `node['nginx']['types_hash_bucket_size']` - Used for the
   `types_hash_bucket_size` configuration directive.
+* `node['nginx']['proxy_read_timeout']` - defines a timeout (between two
+  successive read operations) for reading a response from the proxied server.
+* `node['nginx']['client_max_body_size']` - specifies the maximum accepted body
+  size of a client request, as indicated by the request header Content-Length.
 
 ### Attributes for configuring the gzip module
 
@@ -182,7 +190,7 @@ your node location.
 These attributes are used in the `nginx::upload_progress_module`
 recipe.
 
-* `node['nginx']['upload_progress]['url']` - URL for the tarball.
+* `node['nginx']['upload_progress']['url']` - URL for the tarball.
 * `node['nginx']['upload_progress']['checksum']` - Checksum of the
   tarball.
 
@@ -217,17 +225,21 @@ These attributes are used in the `nginx::passenger` recipe.
 
 These attributes are used in the `nginx::http_echo_module` recipe.
 
-* `node['nginx']['echo]['version']` - The version of `http_echo` you want (default: 0.40)
-* `node['nginx']['echo]['url']` - URL for the tarball.
+* `node['nginx']['echo']['version']` - The version of `http_echo` you
+  want (default: 0.40)
+* `node['nginx']['echo']['url']` - URL for the tarball.
 * `node['nginx']['echo']['checksum']` - Checksum of the tarball.
 
 Recipes
 =======
 
-This cookbook provides two main recipes for installing Nginx.
+This cookbook provides three main recipes for installing Nginx.
 
 * default.rb: *Use this recipe* if you have a native package for
   Nginx.
+* repo.rb: The developer of Nginx also maintain
+  [stable packages](http://nginx.org/en/download.html) for several
+  platforms.
 * source.rb: *Use this recipe* if you do not have a native package for
   Nginx, or if you want to install a newer version than is available,
   or if you have custom module compilation needs.
