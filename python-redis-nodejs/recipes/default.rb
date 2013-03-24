@@ -23,9 +23,9 @@ apt_repository "nginx" do
   key "C300EE8C"
 end
 
-node['nginx']['log_dir']    = "#{app_path}/app/logs/nginx"
-node['nginx']['user']       = node['web']['user']
-node['nginx']['default_site_enabled'] = false
+node.override['nginx']['log_dir']    = "#{app_path}/app/logs/nginx"
+node.override['nginx']['user']       = node['web']['user']
+node.override['nginx']['default_site_enabled'] = false
 include_recipe "nginx::default"
 
 
