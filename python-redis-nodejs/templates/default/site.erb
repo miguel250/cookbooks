@@ -30,7 +30,9 @@ server {
     log_not_found off;
   }
 
-  location / {
+  try_files $uri @flask;
+
+  location @flask {
         proxy_pass_header Server;
         proxy_set_header Host $http_host;
         proxy_redirect off;

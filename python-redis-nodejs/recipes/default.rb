@@ -38,6 +38,7 @@ apt_repository "nginx" do
   key "C300EE8C"
 end
 
+node.override['nginx']['sendfile'] = 'off'
 node.override['nginx']['log_dir']    = "#{app_path}/logs/nginx"
 node.override['nginx']['user']       = node['web']['user']
 node.override['nginx']['default_site_enabled'] = false
@@ -48,20 +49,18 @@ template "/etc/nginx/sites-available/site" do
   owner "root"
   group "root"
   mode 00644
-  variables(:app_path => "#{app_path}/public")
+  variables(:app_path => "#{app_path}/assets")
   notifies :reload, 'service[nginx]'
 end
 
 
 node.override['supervisor']['inet_port'] = '*:9001'
-node.override['supervisor']['inet_username'] = 'dev'
-node.override['supervisor']['inet_password'] = 'dev'
 include_recipe "supervisor"
 
 environment = {'PYTHONPATH'=> app_path, 'ENVIRONMENT'=> 'development'}
 
 supervisor_service "web-server" do
-  command "#{app_path}/../python/bin/python #{app_path}/jukebox/app.py"
+  command "#{app_path}/../python/bin/python #{app_path}/jukebox/server.py"
   action [:enable, :start]
   startretries 10
   redirect_stderr=true
