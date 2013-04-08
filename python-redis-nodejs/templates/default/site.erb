@@ -30,6 +30,10 @@ server {
     log_not_found off;
   }
 
+  location /js {
+    alias /home/vagrant/app/public/js;
+  }
+
   try_files $uri @flask;
 
   location @flask {
