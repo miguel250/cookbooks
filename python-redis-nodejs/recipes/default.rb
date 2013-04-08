@@ -73,6 +73,20 @@ supervisor_service "web-server" do
   user node['web']['user']
 end
 
+supervisor_service "workers" do
+  command "#{app_path}/../python/bin/celery worker --app=jukebox.tasks -l info"
+  action [:enable, :start]
+  startretries 10
+  redirect_stderr=true
+  environment environment
+  stopasgroup true
+  directory app_path
+  stdout_logfile "#{app_path}/logs/celery.log"
+  stderr_logfile "#{app_path}/logs/celery.log"
+  autostart true
+  user node['web']['user']
+end
+
 execute "Install app requirements" do
     command "cd #{app_path} && make requirement"
     user node['web']['user']
