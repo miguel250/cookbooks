@@ -59,6 +59,11 @@ include_recipe "supervisor"
 
 environment = {'PYTHONPATH'=> app_path, 'ENVIRONMENT'=> 'development'}
 
+execute "Install app requirements" do
+    command "cd #{app_path} && make requirement"
+    user node['web']['user']
+end
+
 supervisor_service "web-server" do
   command "#{app_path}/../python/bin/python #{app_path}/jukebox/server.py"
   action [:enable, :start]
@@ -85,11 +90,6 @@ supervisor_service "workers" do
   stderr_logfile "#{app_path}/logs/celery.log"
   autostart true
   user node['web']['user']
-end
-
-execute "Install app requirements" do
-    command "cd #{app_path} && make requirement"
-    user node['web']['user']
 end
 
 nginx_site 'site' do
