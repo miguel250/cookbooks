@@ -30,6 +30,8 @@ python_virtualenv "#{home_path}/python" do
   action :create
 end
 
+package "yui-compressor"
+
 apt_repository "nginx" do
   uri "http://ppa.launchpad.net/nginx/development/ubuntu"
   distribution node['lsb']['codename']

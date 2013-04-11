@@ -32,6 +32,19 @@ server {
 
   location /js {
     alias /home/vagrant/app/public/js;
+
+    #gzip_static       on;
+    #expires           max;
+    #add_header        Cache-Control public;
+    #add_header        Last-Modified "";
+  }
+
+  location /css {
+    alias /home/vagrant/app/public/css;
+    #gzip_static       on;
+    #expires           max;
+    #add_header        Cache-Control public;
+    #add_header        Last-Modified "";
   }
 
   try_files $uri @flask;
